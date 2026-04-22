@@ -30,6 +30,7 @@ jobs:
         run: |
           mkdir -p release_assets
           gh release download ${{ github.event.release.tag_name }} --dir release_assets
+          rm -f release_assets/*.yml
 
       # Google Cloud Platform Auth (Keyless WIF Handshake)
       - name: Authenticate to Google Cloud
