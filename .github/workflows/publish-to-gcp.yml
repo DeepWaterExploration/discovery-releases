@@ -1,0 +1,47 @@
+name: Deploy Published Release to GCP
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  upload-to-gcp:
+    runs-on: ubuntu-22.04
+
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        
+      # Removes 'v' from version string
+      - name: Format Version String
+        env:
+          TAG_NAME: ${{ github.event.release.tag_name }}
+        run: |
+          CLEAN_VERSION="${TAG_NAME#v}"
+          echo "CLEAN_VERSION=$CLEAN_VERSION" >> $GITHUB_ENV
+          
+      - name: Download Release Assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p release_assets
+          gh release download ${{ github.event.release.tag_name }} --dir release_assets
+
+      # Google Cloud Platform Auth (Keyless WIF Handshake)
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: 'projects/763924193823/locations/global/workloadIdentityPools/github-actions-pool/providers/github-provider'
+          service_account: 'discovery-ci-deployer@secure-brook-401818.iam.gserviceaccount.com'
+
+      # Upload contents to discovery-public/{version}/ bucket
+      - name: Upload to Cloud Storage
+        uses: google-github-actions/upload-cloud-storage@v2
+        with:
+          path: 'release_assets'
+          destination: 'discovery-public/${{ env.CLEAN_VERSION }}'
+          parent: false
