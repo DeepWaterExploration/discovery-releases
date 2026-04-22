@@ -18,7 +18,7 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         
       # Removes 'v' from version string
       - name: Format Version String
@@ -38,14 +38,14 @@ jobs:
 
       # Google Cloud Platform Auth (Keyless WIF Handshake)
       - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v2
+        uses: google-github-actions/auth@v3
         with:
           workload_identity_provider: 'projects/763924193823/locations/global/workloadIdentityPools/github-actions-pool/providers/github-provider'
           service_account: 'discovery-ci-deployer@secure-brook-401818.iam.gserviceaccount.com'
 
       # Upload contents to discovery-public/{version}/ bucket
       - name: Upload to Cloud Storage
-        uses: google-github-actions/upload-cloud-storage@v2
+        uses: google-github-actions/upload-cloud-storage@v3
         with:
           path: 'release_assets'
           destination: 'discovery-public/${{ env.CLEAN_VERSION }}'
