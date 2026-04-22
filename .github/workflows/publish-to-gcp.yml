@@ -50,3 +50,4 @@ jobs:
           path: 'release_assets'
           destination: 'discovery-public/${{ env.CLEAN_VERSION }}'
           parent: false
+          process_gcloudignore: false
