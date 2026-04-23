@@ -21,8 +21,16 @@ jobs:
         env:
           TAG_NAME: ${{ github.event.release.tag_name }}
         run: |
-          CLEAN_VERSION="${TAG_NAME#v}"
-          echo "CLEAN_VERSION=$CLEAN_VERSION" >> $GITHUB_ENV
+          # Strip the 'v' prefix
+          STRIPPED="${TAG_NAME#v}"
+          
+          # Split into parts and apply zero-padding to each number
+          IFS='.' read -r year month day <<< "$STRIPPED"
+          PADDED_VERSION=$(printf "%02d.%02d.%02d" "$year" "$month" "$day")
+          
+          # Save to env
+          echo "CLEAN_VERSION=$PADDED_VERSION" >> $GITHUB_ENV
+          echo "Formatted version for GCP: $PADDED_VERSION"
           
       - name: Download Release Assets
         env:
