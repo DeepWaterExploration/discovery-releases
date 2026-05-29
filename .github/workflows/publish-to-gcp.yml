@@ -50,11 +50,14 @@ jobs:
           workload_identity_provider: 'projects/763924193823/locations/global/workloadIdentityPools/github-actions-pool/providers/github-provider'
           service_account: 'discovery-ci-deployer@secure-brook-401818.iam.gserviceaccount.com'
 
-      # Upload contents to discovery-public/{version}/ bucket
+      # Upload contents to discovery-public/{version}/ bucket and replace discovery-public/latest/
       - name: Upload to Cloud Storage
-        uses: google-github-actions/upload-cloud-storage@v3
-        with:
-          path: 'release_assets'
-          destination: 'discovery-public/${{ env.CLEAN_VERSION }}'
-          parent: false
-          process_gcloudignore: false
+        run: |
+          echo "Uploading version folder..."
+          gcloud storage cp --recursive release_assets/* gs://discovery-public/${{ env.CLEAN_VERSION }}/
+          
+          echo "Removing old latest/..."
+          gcloud storage rm --recursive gs://discovery-public/latest/ || true
+
+          echo "Uploading new latest/..."
+          gcloud storage cp --recursive release_assets/* gs://discovery-public/latest/
