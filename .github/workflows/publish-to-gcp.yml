@@ -55,9 +55,26 @@ jobs:
         run: |
           echo "Uploading version folder..."
           gcloud storage cp --recursive release_assets/* gs://discovery-public/${{ env.CLEAN_VERSION }}/
+
+          echo "Renaming assets for latest..."
+          mkdir -p latest_assets
+          cp release_assets/* latest_assets/
+
+          cd latest_assets
+          for file in *; do
+            if [ -f "$file" ]; then
+              new_name=$(echo "$file" | sed -E 's/-installer-.*\./-installer-latest./')
+
+              if [ "$file" != "$new_name" ]; then
+                mv "$file" "$new_name"
+                echo "Renamed: $file -> $new_name"
+              fi
+            fi
+          done
+          cd ..
           
           echo "Removing old latest/..."
           gcloud storage rm --recursive gs://discovery-public/latest/ || true
 
           echo "Uploading new latest/..."
-          gcloud storage cp --recursive release_assets/* gs://discovery-public/latest/
+          gcloud storage cp --recursive latest_assets/* gs://discovery-public/latest/
