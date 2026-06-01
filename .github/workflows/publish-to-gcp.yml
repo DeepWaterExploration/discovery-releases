@@ -60,7 +60,8 @@ jobs:
           mkdir -p latest_assets
           cp release_assets/* latest_assets/
 
-          RAW_VERSION="${TAG_NAME#v}"
+          RAW_TAG="${{ github.event.release.tag_name }}"
+          RAW_VERSION="${RAW_TAG#v}"
 
           cd latest_assets
           for file in *; do
