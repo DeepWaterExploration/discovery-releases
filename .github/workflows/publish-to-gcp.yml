@@ -60,10 +60,16 @@ jobs:
           mkdir -p latest_assets
           cp release_assets/* latest_assets/
 
+          RAW_VERSION="${TAG_NAME#v}"
+
           cd latest_assets
           for file in *; do
             if [ -f "$file" ]; then
-              new_name=$(echo "$file" | sed -E 's/-installer-.*\./-installer-latest./')
+              # replace "{ver}-installer" with "installer-latest"
+              new_name="${file//-$RAW_VERSION-installer/-installer-latest}"
+
+              # no "installer", replace {ver} with "latest"
+              new_name="${new_name//-$RAW_VERSION/-latest}"
 
               if [ "$file" != "$new_name" ]; then
                 mv "$file" "$new_name"
